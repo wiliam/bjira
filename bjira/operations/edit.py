@@ -1,3 +1,4 @@
+import json
 import sys
 
 from jira import JIRAError
@@ -32,9 +33,16 @@ class Operation(BJiraOperation):
                             help="escape hatch for fields not in the map; repeatable")
         parser.add_argument("--force", action="store_true",
                             help="allow overwriting non-empty summary/description")
+        parser.add_argument("--list-fields", dest="list_fields", action="store_true",
+                            help="list editable fields for this issue and exit")
+        parser.add_argument("--json", dest="as_json", action="store_true",
+                            help="with --list-fields, emit JSON instead of a table")
         parser.set_defaults(func=self._run)
 
     def _run(self, args):
+        if args.list_fields:
+            return self._list_fields(args.key, args.as_json)
+
         if args.description is not None and args.description_file is not None:
             self._fail_args("--description and --description-file are mutually exclusive")
 
@@ -121,6 +129,47 @@ class Operation(BJiraOperation):
             else:
                 parts.append(f"{k}={v}")
         print(f"OK: {args.key} {', '.join(parts)}")
+
+    def _list_fields(self, key, as_json):
+        jira = self.get_jira_api()
+        try:
+            meta = jira.editmeta(key)
+        except JIRAError as exc:
+            self._fail_api(key, exc)
+
+        rows = []
+        for fid, spec in (meta.get("fields") or {}).items():
+            name = spec.get("name", fid)
+            schema = spec.get("schema") or {}
+            ftype = schema.get("type", "?")
+            ops = ",".join(spec.get("operations") or [])
+            allowed = spec.get("allowedValues") or []
+            allowed_display = ", ".join(
+                (av.get("name") or av.get("value") or av.get("key") or str(av))
+                for av in allowed[:10]
+            )
+            if len(allowed) > 10:
+                allowed_display += f", ... ({len(allowed)} total)"
+            rows.append({"field": name, "id": fid, "type": ftype,
+                         "ops": ops, "allowed": allowed_display})
+
+        if as_json:
+            print(json.dumps(rows, ensure_ascii=False, indent=2))
+            return
+
+        if not rows:
+            print(f"{key}: no editable fields (check permissions?)")
+            return
+
+        widths = {col: max(len(col), max(len(str(r[col])) for r in rows))
+                  for col in ("field", "id", "type", "ops")}
+        header = (f"{'field':<{widths['field']}}  {'id':<{widths['id']}}  "
+                  f"{'type':<{widths['type']}}  {'ops':<{widths['ops']}}  allowed")
+        print(header)
+        print("-" * len(header))
+        for r in rows:
+            print(f"{r['field']:<{widths['field']}}  {r['id']:<{widths['id']}}  "
+                  f"{r['type']:<{widths['type']}}  {r['ops']:<{widths['ops']}}  {r['allowed']}")
 
     def _fail_args(self, msg):
         print(f"ERROR: edit: {msg}", file=sys.stderr)
