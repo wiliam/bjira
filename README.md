@@ -128,6 +128,13 @@ bjira setpass
 ~ » bjira status PORTFOLIO-53307 1501                                   # transition by id
 
 ~ » bjira link PORTFOLIO-53307 Blocks PORTFOLIO-54000                   # link existing issues
+~ » bjira link --list                                                   # show available link types
+
+~ » bjira edit PORTFOLIO-53307 --version 2026Q2 --team Конверсы         # map-driven fields
+~ » bjira edit PORTFOLIO-53307 --priority Major                         # named flag from FIELD_SPECS
+~ » bjira edit PORTFOLIO-53307 --set customfield_99999=hello            # escape hatch for rare fields
+~ » bjira edit PORTFOLIO-53307 --list-fields                            # editable fields + allowed enum values
+~ » bjira edit PORTFOLIO-53307 --list-fields --json                     # same, as JSON
 ```
 
 **Exit codes:** `0` success, `2` arg error, `3` API error (auth/permission/not-found, ambiguous/unknown match). Pass `-v` for SDK debug logging.

@@ -54,6 +54,18 @@ def main():
     assert r.returncode == 3, f"expected exit 3, got {r.returncode}"
     print("  correctly returned exit 3 for unknown link type")
 
+    print("\n=== 6. edit --list-fields (metadata read) ===")
+    r = run(["bjira", "edit", ISSUE, "--list-fields"])
+    assert r.returncode == 0, "list-fields failed"
+    assert "field" in r.stdout, "expected header in list-fields output"
+    assert "fixVersions" in r.stdout or "customfield" in r.stdout, \
+        "expected fixVersions or a customfield row"
+
+    print("\n=== 7. link --list ===")
+    r = run(["bjira", "link", "--list"])
+    assert r.returncode == 0, "link --list failed"
+    assert "Relation" in r.stdout, "expected Relation in link types"
+
     print("\n=== all smoke checks passed ===")
 
 
