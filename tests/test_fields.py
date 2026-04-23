@@ -1,6 +1,6 @@
 import pytest
 
-from bjira._fields import merge_labels, parse_due
+from bjira._fields import merge_labels, parse_due, should_require_force
 
 
 def test_merge_labels_adds_new():
@@ -48,3 +48,29 @@ def test_parse_due_rejects_empty():
 def test_parse_due_rejects_bad_calendar_date():
     with pytest.raises(ValueError):
         parse_due("2026-13-40")
+
+
+def test_force_required_when_description_nonempty_and_no_force():
+    assert should_require_force("description", current="old body", force=False) is True
+
+
+def test_force_not_required_when_description_empty():
+    assert should_require_force("description", current="", force=False) is False
+
+
+def test_force_not_required_when_description_whitespace_only():
+    assert should_require_force("description", current="   \n\n  ", force=False) is False
+
+
+def test_force_not_required_when_force_passed():
+    assert should_require_force("description", current="old body", force=True) is False
+
+
+def test_force_required_when_summary_nonempty_and_no_force():
+    assert should_require_force("summary", current="old title", force=False) is True
+
+
+def test_force_not_required_for_other_fields():
+    assert should_require_force("duedate", current="2026-01-01", force=False) is False
+    assert should_require_force("labels", current=["a"], force=False) is False
+    assert should_require_force("assignee", current="someone", force=False) is False

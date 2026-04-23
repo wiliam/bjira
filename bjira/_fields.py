@@ -33,3 +33,21 @@ def parse_due(value):
     except ValueError as exc:
         raise ValueError(f"due must be YYYY-MM-DD or 'none', got {value!r}") from exc
     return value
+
+
+_FORCE_GATED_FIELDS = {"summary", "description"}
+
+
+def should_require_force(field, current, force):
+    """Return True if this edit needs --force but force was not passed.
+
+    Only 'summary' and 'description' are gated: they are free-form, potentially long,
+    and a typo'd overwrite is painful. Whitespace-only existing values count as empty.
+    """
+    if force:
+        return False
+    if field not in _FORCE_GATED_FIELDS:
+        return False
+    if not current or not current.strip():
+        return False
+    return True
