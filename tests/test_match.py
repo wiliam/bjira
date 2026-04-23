@@ -1,5 +1,5 @@
 import pytest
-from bjira._match import match_transition, AmbiguousMatch, NoMatch
+from bjira._match import match_transition, resolve_link_type, AmbiguousMatch, NoMatch
 
 
 TRANSITIONS = [
@@ -46,3 +46,25 @@ def test_exact_name_wins_over_substring():
 def test_numeric_id_not_in_list_raises():
     with pytest.raises(NoMatch):
         match_transition("9999", TRANSITIONS)
+
+
+LINK_TYPES = [
+    {"name": "Blocks", "inward": "blocked by", "outward": "blocks"},
+    {"name": "Relates", "inward": "relates to", "outward": "relates to"},
+    {"name": "Duplicate", "inward": "is duplicated by", "outward": "duplicates"},
+]
+
+
+def test_resolve_link_type_exact():
+    assert resolve_link_type("Blocks", LINK_TYPES) == "Blocks"
+
+
+def test_resolve_link_type_case_insensitive():
+    assert resolve_link_type("blocks", LINK_TYPES) == "Blocks"
+    assert resolve_link_type("BLOCKS", LINK_TYPES) == "Blocks"
+
+
+def test_resolve_link_type_unknown_raises():
+    with pytest.raises(NoMatch) as exc:
+        resolve_link_type("notarealtype", LINK_TYPES)
+    assert "Blocks" in str(exc.value)

@@ -43,3 +43,13 @@ def match_transition(query, transitions):
         raise AmbiguousMatch(f"ambiguous (matches {len(substr)}: {candidates})")
 
     raise NoMatch(f"no transition matches {query!r}")
+
+
+def resolve_link_type(query, link_types):
+    """Return canonical link type name (case-insensitive exact match)."""
+    q = query.lower()
+    for lt in link_types:
+        if lt["name"].lower() == q:
+            return lt["name"]
+    available = ", ".join(lt["name"] for lt in link_types)
+    raise NoMatch(f"unknown link type {query!r}; available: {available}")
