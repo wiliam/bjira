@@ -66,6 +66,32 @@ def main():
     assert r.returncode == 0, "link --list failed"
     assert "Relation" in r.stdout, "expected Relation in link types"
 
+    print("\n=== 8. block / unblock round-trip ===")
+    r = run(["bjira", "block", ISSUE,
+             "--type", "Ожидание выпуска фичи",
+             "--reason", "[SMOKE] block/unblock round-trip",
+             "--start", "2026-04-24",
+             "--end", "2026-04-30"])
+    assert r.returncode == 0, "block failed"
+    import re
+    m = re.search(r"(BLOCKER-\d+)", r.stdout)
+    assert m, f"no BLOCKER key in block output: {r.stdout!r}"
+    blocker_key = m.group(1)
+    print(f"  created {blocker_key}")
+
+    r = run(["bjira", "unblock", ISSUE])
+    assert r.returncode == 0, "unblock failed"
+
+    b = jira.issue(blocker_key, fields="status")
+    assert b.fields.status.name == "Блокировка снята", \
+        f"expected BLOCKER resolved, got {b.fields.status.name}"
+    print(f"  {blocker_key} resolved")
+
+    print("\n=== 9. block --list-types ===")
+    r = run(["bjira", "block", ISSUE, "--list-types"])
+    assert r.returncode == 0, "list-types failed"
+    assert "Ожидание выпуска фичи" in r.stdout
+
     print("\n=== all smoke checks passed ===")
 
 

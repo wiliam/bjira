@@ -135,6 +135,15 @@ bjira setpass
 ~ » bjira edit PORTFOLIO-53307 --set customfield_99999=hello            # escape hatch for rare fields
 ~ » bjira edit PORTFOLIO-53307 --list-fields                            # editable fields + allowed enum values
 ~ » bjira edit PORTFOLIO-53307 --list-fields --json                     # same, as JSON
+
+~ » bjira block PORTFOLIO-53307 --type "Ожидание выпуска фичи" \
+      --reason "ждём релиз X" --start 2026-05-01 --end 2026-05-15 \
+      --comment "заблокировали до релиза"                              # full block via workflow
+~ » bjira block PORTFOLIO-53307 --type "больничный" --absence BLOCKER-21281   # link existing absence
+~ » bjira block PORTFOLIO-53307 --list-types                           # types for this issue's screen
+~ » bjira unblock PORTFOLIO-53307                                      # one-gesture unblock
+~ » bjira unblock PORTFOLIO-53307 --blocker BLOCKER-21945              # close one blocker only (manual)
+~ » bjira unblock PORTFOLIO-53307 --keep-flag                          # close blocker, keep the flag
 ```
 
 **Exit codes:** `0` success, `2` arg error, `3` API error (auth/permission/not-found, ambiguous/unknown match). Pass `-v` for SDK debug logging.
