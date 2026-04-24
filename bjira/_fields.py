@@ -67,6 +67,7 @@ FIELD_SPECS = {
     "version":     ("fixVersions",        lambda v: [{"name": v}],       []),
     "team":        ("customfield_34238",  lambda v: [{"value": v}],      []),
     "sp":          ("customfield_11212",  float,                         None),
+    "flagged":     ("customfield_11210",  lambda v: [{"value": v}],      []),
 }
 
 SET_DENY = {

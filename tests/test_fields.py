@@ -135,3 +135,11 @@ def test_parse_set_arg_rejects_denied_field():
 
 def test_set_deny_includes_workflow_fields():
     assert {"status", "resolution", "issuetype", "project"}.issubset(SET_DENY)
+
+
+def test_field_specs_includes_flagged():
+    assert "flagged" in FIELD_SPECS
+    jira_field, to_payload, clear = FIELD_SPECS["flagged"]
+    assert jira_field == "customfield_11210"
+    assert to_payload("Impediment") == [{"value": "Impediment"}]
+    assert clear == []
