@@ -33,6 +33,14 @@ class BJiraOperation:
     def get_team(self):
         return self.get_config().get('team')
 
+    def get_fieldsets(self):
+        """Optional `fieldsets` map from ~/.bjira_config — name -> list of field labels.
+
+        Used by `bjira show` to expand alias names like 'blocker' into their
+        configured field list. Returns {} if the section is missing.
+        """
+        return self.get_config().get('fieldsets') or {}
+
     def get_task_url(self, task_name):
         host = self.get_config()['host']
         return f'{host}/browse/{task_name}'
