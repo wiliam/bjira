@@ -135,6 +135,26 @@ bjira setpass
 ~ » bjira edit PORTFOLIO-53307 --set customfield_99999=hello            # escape hatch for rare fields
 ~ » bjira edit PORTFOLIO-53307 --list-fields                            # editable fields + allowed enum values
 ~ » bjira edit PORTFOLIO-53307 --list-fields --json                     # same, as JSON
+
+~ » bjira show PORTFOLIO-53307                                          # default fieldset
+~ » bjira show PORTFOLIO-53307 --fields "summary,Flagged,Дата блокировки"   # explicit fields by name or id
+~ » bjira show PORTFOLIO-53307 --fields blocker                         # alias from ~/.bjira_config 'fieldsets'
+~ » bjira show PORTFOLIO-53307 --fields blocker,timing --json           # combine aliases, output JSON
+```
+
+### `fieldsets` in `~/.bjira_config` (optional)
+
+```json
+{
+    "host": "https://jira.hh.ru",
+    "user": "...",
+    "team": "...",
+    "fieldsets": {
+        "default":  ["summary", "status", "assignee", "labels", "duedate"],
+        "blocker":  ["Flagged", "is_blocked", "Дата блокировки", "Дата разблокировки", "BlockerTime (days)"],
+        "timing":   ["created", "updated", "duedate", "Start date"]
+    }
+}
 ```
 
 **Exit codes:** `0` success, `2` arg error, `3` API error (auth/permission/not-found, ambiguous/unknown match). Pass `-v` for SDK debug logging.
