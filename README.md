@@ -136,6 +136,11 @@ bjira setpass
 ~ » bjira edit PORTFOLIO-53307 --list-fields                            # editable fields + allowed enum values
 ~ » bjira edit PORTFOLIO-53307 --list-fields --json                     # same, as JSON
 
+~ » bjira show PORTFOLIO-53307                                          # default fieldset
+~ » bjira show PORTFOLIO-53307 --fields "summary,Flagged,Дата блокировки"   # explicit fields by name or id
+~ » bjira show PORTFOLIO-53307 --fields blocker                         # alias from ~/.bjira_config 'fieldsets'
+~ » bjira show PORTFOLIO-53307 --fields blocker,timing --json           # combine aliases, output JSON
+
 ~ » bjira block PORTFOLIO-53307 --type "Ожидание выпуска фичи" \
       --reason "ждём релиз X" --start 2026-05-01 --end 2026-05-15 \
       --comment "заблокировали до релиза"                              # full block via workflow
@@ -144,6 +149,21 @@ bjira setpass
 ~ » bjira unblock PORTFOLIO-53307                                      # one-gesture unblock
 ~ » bjira unblock PORTFOLIO-53307 --blocker BLOCKER-21945              # close one blocker only (manual)
 ~ » bjira unblock PORTFOLIO-53307 --keep-flag                          # close blocker, keep the flag
+```
+
+### `fieldsets` in `~/.bjira_config` (optional)
+
+```json
+{
+    "host": "https://jira.hh.ru",
+    "user": "...",
+    "team": "...",
+    "fieldsets": {
+        "default":  ["summary", "status", "assignee", "labels", "duedate"],
+        "blocker":  ["Flagged", "is_blocked", "Дата блокировки", "Дата разблокировки", "BlockerTime (days)"],
+        "timing":   ["created", "updated", "duedate", "Start date"]
+    }
+}
 ```
 
 **Exit codes:** `0` success, `2` arg error, `3` API error (auth/permission/not-found, ambiguous/unknown match). Pass `-v` for SDK debug logging.
